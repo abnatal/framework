@@ -58,7 +58,7 @@ import br.gov.frameworkdemoiselle.util.ResourceBundle;
  * @author SERPRO
  */
 @Interceptor
-@RequiredRole(value = "")
+@RequiredRole(value = "", operator = "")
 public class RequiredRoleInterceptor implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -82,6 +82,7 @@ public class RequiredRoleInterceptor implements Serializable {
 	@AroundInvoke
 	public Object manage(final InvocationContext ic) throws Exception {
 		List<String> roles = getRoles(ic);
+		String operator = getOperator(ic);
 
 		if (getSecurityContext().isLoggedIn()) {
 			getLogger().info(
@@ -97,7 +98,7 @@ public class RequiredRoleInterceptor implements Serializable {
 			}
 		}
 
-		if (userRoles.isEmpty()) {
+		if (userRoles.isEmpty() || (operator.equals("all") & !userRoles.containsAll(roles))) {
 			getLogger()
 					.error(getBundle().getString("does-not-have-role", getSecurityContext().getCurrentUser().getName(),
 							roles));
@@ -131,6 +132,19 @@ public class RequiredRoleInterceptor implements Serializable {
 		}
 
 		return Arrays.asList(roles);
+	}
+	
+	private String getOperator(InvocationContext ic) {
+
+		if (ic.getMethod().getAnnotation(RequiredRole.class) == null) {
+			if (ic.getTarget().getClass().getAnnotation(RequiredRole.class) != null) {
+				return ic.getTarget().getClass().getAnnotation(RequiredRole.class).operator();
+			}
+		} else {
+			return ic.getMethod().getAnnotation(RequiredRole.class).operator();
+		}
+
+		return "";
 	}
 
 	private SecurityContext getSecurityContext() {

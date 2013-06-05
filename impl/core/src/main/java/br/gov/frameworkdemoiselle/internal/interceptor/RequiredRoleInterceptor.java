@@ -52,7 +52,7 @@ import br.gov.frameworkdemoiselle.security.RequiredRole;
  */
 @Deprecated
 @Interceptor
-@RequiredRole(value = "")
+@RequiredRole(value = "", operator = "")
 public class RequiredRoleInterceptor extends br.gov.frameworkdemoiselle.security.RequiredRoleInterceptor {
 
 	private static final long serialVersionUID = 1L;
